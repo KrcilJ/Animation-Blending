@@ -43,13 +43,13 @@ SceneModel::SceneModel()
 	veerLeftCycle.ReadFileBVH(motionBvhveerLeft);
 	veerRightCycle.ReadFileBVH(motionBvhveerRight);
 
-	// set the world to opengl matrix
-	world2OpenGLMatrix = Matrix4::RotateX(90.0);
-	CameraTranslateMatrix = Matrix4::Translate(Cartesian3(-5, 15, -15.5));
-	CameraRotationMatrix = Matrix4::RotateX(-30.0) * Matrix4::RotateZ(15.0);
+    // set the world to opengl matrix
+    world2OpenGLMatrix = Matrix4::RotateX(90.0);
+    CameraTranslateMatrix = Matrix4::Translate(Cartesian3(-5, 15, -15.5));
+    CameraRotationMatrix = Matrix4::RotateX(-30.0) * Matrix4::RotateZ(15.0);
 
-	// initialize the character's position and rotation
-	EventCharacterReset();
+    // initialize the character's position and rotation
+    EventCharacterReset();
 
 	// and set the frame number to 0
 	frameNumber = 0;
