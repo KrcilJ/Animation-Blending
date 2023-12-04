@@ -51,74 +51,100 @@ SceneModel::SceneModel()
     // initialize the character's position and rotation
     EventCharacterReset();
 
-	// and set the frame number to 0
-	frameNumber = 0;
+    // and set the frame number to 0
+    frameNumber = 0;
 
-	} // constructor
+    } // constructor
 
-// routine that updates the scene for the next frame
-void SceneModel::Update()
-	{ // Update()
-	// increment the frame counter
-	frameNumber++;
-	
-	} // Update()
+    // routine that updates the scene for the next frame
+    void SceneModel::Update()
+    { // Update()
+    // increment the frame counter
+    frameNumber++;
 
-// routine to tell the scene to render itself
-void SceneModel::Render()
-	{ // Render()
-	// enable Z-buffering
-	glEnable(GL_DEPTH_TEST);
-	
-	// set lighting parameters
-	glShadeModel(GL_FLAT);
-	glEnable(GL_LIGHT0);
-	glEnable(GL_LIGHTING);
-	glLightfv(GL_LIGHT0, GL_AMBIENT, sunAmbient);
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, sunDiffuse);
-	glLightfv(GL_LIGHT0, GL_SPECULAR, blackColour);
-	glLightfv(GL_LIGHT0, GL_EMISSION, blackColour);
-	
-	// background is sky-blue
-	glClearColor(0.7, 0.7, 1.0, 1.0);
+    } // Update()
 
-	// clear the buffer
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    // routine to tell the scene to render itself
+    void SceneModel::Render()
+    { // Render()
+    // enable Z-buffering
+    glEnable(GL_DEPTH_TEST);
 
-	// compute the view matrix by combining camera translation, rotation & world2OpenGL
-	viewMatrix = world2OpenGLMatrix * CameraRotationMatrix * CameraTranslateMatrix;
+    // set lighting parameters
+    glShadeModel(GL_FLAT);
+    glEnable(GL_LIGHT0);
+    glEnable(GL_LIGHTING);
+    glLightfv(GL_LIGHT0, GL_AMBIENT, sunAmbient);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, sunDiffuse);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, blackColour);
+    glLightfv(GL_LIGHT0, GL_EMISSION, blackColour);
 
-	// compute the light position
-  	Homogeneous4 lightDirection = world2OpenGLMatrix * CameraRotationMatrix * sunDirection;
-  	
-  	// turn it into Cartesian and normalise
-  	Cartesian3 lightVector = lightDirection.Vector().unit();
+    // background is sky-blue
+    glClearColor(0.7, 0.7, 1.0, 1.0);
 
-	// and set the w to zero to force infinite distance
- 	lightDirection.w = 0.0;
- 	 	
-	// pass it to OpenGL
-	glLightfv(GL_LIGHT0, GL_POSITION, &(lightVector.x));
+    // clear the buffer
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	// and set a material colour for the ground
-	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, groundColour);
-	glMaterialfv(GL_FRONT, GL_SPECULAR, blackColour);
-	glMaterialfv(GL_FRONT, GL_EMISSION, blackColour);
+    // compute the view matrix by combining camera translation, rotation & world2OpenGL
+    viewMatrix = world2OpenGLMatrix * CameraRotationMatrix * CameraTranslateMatrix;
 
-	// render the terrain
-	groundModel.Render(viewMatrix);
+    // compute the light position
+    Homogeneous4 lightDirection = world2OpenGLMatrix * CameraRotationMatrix * sunDirection;
 
-	// now set the colour to draw the bones
-	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, boneColour);
+    // turn it into Cartesian and normalise
+    Cartesian3 lightVector = lightDirection.Vector().unit();
 
-	} // Render()	
+    // and set the w to zero to force infinite distance
+    lightDirection.w = 0.0;
 
-// camera control events: WASD for motion
-void SceneModel::EventCameraForward()
-	{ // EventCameraForward()
-	// update the camera matrix
-	CameraTranslateMatrix = CameraTranslateMatrix * CameraRotationMatrix.transpose() * Matrix4::Translate(Cartesian3(0.0f, -cameraSpeed, 0.0f)) * CameraRotationMatrix;
-	} // EventCameraForward()
+    // pass it to OpenGL
+    glLightfv(GL_LIGHT0, GL_POSITION, &(lightVector.x));
+
+    // and set a material colour for the ground
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, groundColour);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, blackColour);
+    glMaterialfv(GL_FRONT, GL_EMISSION, blackColour);
+
+    // render the terrain
+    groundModel.Render(viewMatrix);
+
+    // now set the colour to draw the bones
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, boneColour);
+
+    //    for (int joint = 0; joint < restPose.all_joints.size(); ++joint) {
+    //        Joint *currParent = restPose.all_joints[joint];
+    //        for (int children = 0; children < restPose.all_joints[joint]->Children.size(); ++children) {
+    //            Joint currChild = currParent->Children[children];
+    //            Cartesian3 start = Cartesian3(currParent->joint_offset[0],
+    //                                          currParent->joint_offset[1],
+    //                                          currParent->joint_offset[2]);
+    //            Cartesian3 end = Cartesian3(currChild.joint_offset[0],
+    //                                        currChild.joint_offset[1],
+    //                                        currChild.joint_offset[2]);
+
+    //            restPose.RenderCylinder(viewMatrix, start, end);
+    //        }
+    //    }
+    //    for (int i = 0; i < restPose.boneTranslations.size() - 1; ++i) {
+    //        Matrix4 rotation = Matrix4::RotateX(restPose.boneRotations[0][i].x)
+    //                           * Matrix4::RotateY(restPose.boneRotations[0][i].y)
+    //                           * Matrix4::RotateZ(restPose.boneRotations[0][i].z);
+    //        Cartesian3 start = restPose.boneTranslations[i];
+    //        Cartesian3 end = restPose.boneTranslations[i + 1];
+    //        Matrix4 newView = viewMatrix * rotation * Matrix4::Translate(end - start);
+    //        restPose.RenderCylinder(newView, start, end);
+    //    }
+    restPose.Render(viewMatrix, 1.0f, 0);
+    } // Render()
+
+    // camera control events: WASD for motion
+    void SceneModel::EventCameraForward()
+    { // EventCameraForward()
+    // update the camera matrix
+    CameraTranslateMatrix = CameraTranslateMatrix * CameraRotationMatrix.transpose()
+                            * Matrix4::Translate(Cartesian3(0.0f, -cameraSpeed, 0.0f))
+                            * CameraRotationMatrix;
+    } // EventCameraForward()
 
 void SceneModel::EventCameraBackward()
 	{ // EventCameraBackward()

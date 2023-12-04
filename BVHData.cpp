@@ -196,30 +196,62 @@ void BVHData::ReadMotion(std::ifstream& inFile)
 			// store frame into this class
 			this->frames.push_back(frame);
 			}
-		} // more data
-	} // ReadMotion()
+    } // more data
+    } // ReadMotion()
 
-// render hierarchy for a given frame
-void BVHData::Render(Matrix4& viewMatrix, float scale, int frame)
-	{ // Render()
-	RenderJoint(viewMatrix, Matrix4::Identity(), &this->root, scale, frame);
-	} // Render()
+    // render hierarchy for a given frame
+    void BVHData::Render(Matrix4 &viewMatrix, float scale, int frame)
+    { // Render()
+    RenderJoint(viewMatrix, Matrix4::Identity(), &this->root, scale, frame);
+    } // Render()
 
-// render a single joint for a given frame
-void BVHData::RenderJoint(Matrix4& viewMatrix, Matrix4 parentMatrix, Joint* joint, float scale, int frame)
-	{ // RenderJoint()
+    // render a single joint for a given frame
+    void BVHData::RenderJoint(
+        Matrix4 &viewMatrix, Matrix4 parentMatrix, Joint *joint, float scale, int frame)
+    { // RenderJoint()
 
-	// YOUR CODE GOES HERE
+    // Transform joint offset based on frame and scale
+    Cartesian3 jointOffset = boneTranslations[joint->id] * scale;
 
-	} // RenderJoint()
+    // Transform joint position based on parentMatrix
+    //Cartesian3 jointPosition = parentMatrix * jointOffset;
 
-// render cylinder given the start position and the end position
-void BVHData::RenderCylinder(Matrix4& viewMatrix, Cartesian3 start, Cartesian3 end)
-	{ // RenderCylinder()
+    // Render bone as a cylinder
+    if (joint->id > 0) {
+            int parentBoneId = parentBones[joint->id];
+            Cartesian3 parentOffset = boneTranslations[parentBoneId];
 
-	// YOUR CODE GOES HERE
+            Cartesian3 start = parentOffset * scale;
+            Cartesian3 end = jointOffset;
+            Cartesian3 childRotation = boneRotations[frame][joint->id].unit();
+            Matrix4 rotation = Matrix4::RotateX(childRotation.z) * Matrix4::RotateY(childRotation.y)
+                               * Matrix4::RotateZ(childRotation.x);
+            //            Cartesian3 parentRotation = boneRotations[frame][joint->id];
+            //            Matrix4 rotation2 = Matrix4::RotateZ(parentRotation.z)
+            //                                * Matrix4::RotateY(parentRotation.y)
+            //                                * Matrix4::RotateX(parentRotation.x);
+            parentMatrix = /*parentMatrix * */ Matrix4::Translate(end.unit() - start.unit())
+                           * rotation;
+            Matrix4 newView = viewMatrix * parentMatrix /** Matrix4::Translate(end - start)*/;
 
-	} // RenderCylinder()
+            RenderCylinder(newView, start, end);
+    }
+
+    // Render children recursively
+    for (size_t i = 0; i < joint->Children.size(); i++) {
+            RenderJoint(viewMatrix, parentMatrix, &(joint->Children[i]), scale, frame);
+    }
+
+    } // RenderJoint()
+
+    // render cylinder given the start position and the end position
+    void BVHData::RenderCylinder(Matrix4 &viewMatrix, Cartesian3 start, Cartesian3 end)
+    { // RenderCylinder()
+
+    // YOUR CODE GOES HERE
+
+    this->Cylinder(viewMatrix, 0.4f, (end - start).length() / 2.0f, 20);
+    } // RenderCylinder()
 
 // render a single cylinder given radius, length and vertical slices
 void BVHData::Cylinder(Matrix4& viewMatrix, float radius, float Length, int slices)
