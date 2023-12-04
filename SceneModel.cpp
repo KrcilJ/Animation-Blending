@@ -125,16 +125,17 @@ SceneModel::SceneModel()
     //            restPose.RenderCylinder(viewMatrix, start, end);
     //        }
     //    }
-    //    for (int i = 0; i < restPose.boneTranslations.size() - 1; ++i) {
-    //        Matrix4 rotation = Matrix4::RotateX(restPose.boneRotations[0][i].x)
-    //                           * Matrix4::RotateY(restPose.boneRotations[0][i].y)
-    //                           * Matrix4::RotateZ(restPose.boneRotations[0][i].z);
-    //        Cartesian3 start = restPose.boneTranslations[i];
-    //        Cartesian3 end = restPose.boneTranslations[i + 1];
-    //        Matrix4 newView = viewMatrix * rotation * Matrix4::Translate(end - start);
-    //        restPose.RenderCylinder(newView, start, end);
-    //    }
-    restPose.Render(viewMatrix, 1.0f, 0);
+    Cartesian3 start = restPose.boneTranslations[0];
+    for (int i = 1; i < restPose.boneTranslations.size() - 1; ++i) {
+        Matrix4 rotation = Matrix4::RotateX(restPose.boneRotations[0][i].z)
+                           * Matrix4::RotateY(restPose.boneRotations[0][i].y)
+                           * Matrix4::RotateZ(restPose.boneRotations[0][i].x);
+        start = start + restPose.boneTranslations[i];
+        Cartesian3 end = start + restPose.boneTranslations[i + 1];
+        Matrix4 newView = viewMatrix * rotation * Matrix4::Translate(end - start);
+        restPose.RenderCylinder(newView, start, end);
+    }
+    //restPose.Render(viewMatrix, 1.0f, 0);
     } // Render()
 
     // camera control events: WASD for motion
