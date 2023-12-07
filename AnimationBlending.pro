@@ -11,7 +11,8 @@ win32{
 }
 unix{
 
-QT+=opengl -lglu
+QT+=opengl
+LIBS += -lGLU
 }
 
 HEADERS = \

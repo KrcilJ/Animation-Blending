@@ -209,34 +209,40 @@ void BVHData::ReadMotion(std::ifstream& inFile)
     void BVHData::RenderJoint(
         Matrix4 &viewMatrix, Matrix4 parentMatrix, Joint *joint, float scale, int frame)
     { // RenderJoint()
-
+    Matrix4 currRotation = parentMatrix;
+    currRotation[0][3] = 0;
+    currRotation[1][3] = 0;
+    currRotation[2][3] = 0;
+    Cartesian3 parentRotation = boneRotations[frame][joint->id];
+    Matrix4 rotation = Matrix4::RotateX(parentRotation.z) * Matrix4::RotateY(parentRotation.y)
+                       * Matrix4::RotateZ(parentRotation.x);
+    currRotation = rotation * currRotation ;
     // Transform joint offset based on frame and scale
+    Cartesian3 offsetFromRoot = parentMatrix.column(3).Vector();
     Cartesian3 jointOffset = boneTranslations[joint->id] * scale;
+    parentMatrix = parentMatrix * Matrix4::Translate(jointOffset);
+    //parentMatrix = parentMatrix * rotation;
 
     // Transform joint position based on parentMatrix
-    //Cartesian3 jointPosition = parentMatrix * jointOffset;
-
+    // Cartesian3 jointPosition = parentMatrix * jointOffset;
     // Render bone as a cylinder
-    if (joint->id > 0) {
-            int parentBoneId = parentBones[joint->id];
-            Cartesian3 parentOffset = boneTranslations[parentBoneId];
 
-            Cartesian3 start = parentOffset * scale;
-            Cartesian3 end = jointOffset;
-            Cartesian3 childRotation = boneRotations[frame][joint->id].unit();
-            Matrix4 rotation = Matrix4::RotateX(childRotation.z) * Matrix4::RotateY(childRotation.y)
-                               * Matrix4::RotateZ(childRotation.x);
+
+            Cartesian3 start = offsetFromRoot;
+            Cartesian3 end = parentMatrix.column(3).Vector();
+
             //            Cartesian3 parentRotation = boneRotations[frame][joint->id];
             //            Matrix4 rotation2 = Matrix4::RotateZ(parentRotation.z)
             //                                * Matrix4::RotateY(parentRotation.y)
             //                                * Matrix4::RotateX(parentRotation.x);
-            parentMatrix = /*parentMatrix * */ Matrix4::Translate(end.unit() - start.unit())
-                           * rotation;
-            Matrix4 newView = viewMatrix * parentMatrix /** Matrix4::Translate(end - start)*/;
-
+            //parentMatrix = /*parentMatrix * */ Matrix4::Translate(start)
+                           ;
+            Matrix4 newView = viewMatrix * parentMatrix;
+            std::cout << "rendering joint " << joint->joint_name << " at " << offsetFromRoot << std::endl;
             RenderCylinder(newView, start, end);
-    }
 
+
+    //parentMatrix = currRotation  *parentMatrix;
     // Render children recursively
     for (size_t i = 0; i < joint->Children.size(); i++) {
             RenderJoint(viewMatrix, parentMatrix, &(joint->Children[i]), scale, frame);
@@ -249,8 +255,9 @@ void BVHData::ReadMotion(std::ifstream& inFile)
     { // RenderCylinder()
 
     // YOUR CODE GOES HERE
-
-    this->Cylinder(viewMatrix, 0.4f, (end - start).length() / 2.0f, 20);
+    Matrix4 newView = Matrix4::GetRotation(start, end);
+    newView =  viewMatrix * newView;
+    this->Cylinder(newView, 0.1f, (end - start).length(), 20);
     } // RenderCylinder()
 
 // render a single cylinder given radius, length and vertical slices
