@@ -111,32 +111,8 @@ SceneModel::SceneModel()
     // now set the colour to draw the bones
     glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, boneColour);
 
-    //    for (int joint = 0; joint < restPose.all_joints.size(); ++joint) {
-    //        Joint *currParent = restPose.all_joints[joint];
-    //        for (int children = 0; children < restPose.all_joints[joint]->Children.size(); ++children) {
-    //            Joint currChild = currParent->Children[children];
-    //            Cartesian3 start = Cartesian3(currParent->joint_offset[0],
-    //                                          currParent->joint_offset[1],
-    //                                          currParent->joint_offset[2]);
-    //            Cartesian3 end = Cartesian3(currChild.joint_offset[0],
-    //                                        currChild.joint_offset[1],
-    //                                        currChild.joint_offset[2]);
-
-    //            restPose.RenderCylinder(viewMatrix, start, end);
-    //        }
-    //    }
-    //    Cartesian3 start = restPose.boneTranslations[0];
-    //    for (int i = 1; i <
-    //         0; ++i) {
-    //        Matrix4 rotation = Matrix4::RotateX(restPose.boneRotations[0][i].z)
-    //                           * Matrix4::RotateY(restPose.boneRotations[0][i].y)
-    //                           * Matrix4::RotateZ(restPose.boneRotations[0][i].x);
-    //        start = start + restPose.boneTranslations[i];
-    //        Cartesian3 end = start + restPose.boneTranslations[i + 1];
-    //        Matrix4 newView = viewMatrix * Matrix4::Translate(end - start);
-    //        restPose.RenderCylinder(newView, start, end);
-    //    }
     restPose.Render(viewMatrix, 0.1f, 0);
+    //runCycle.Render(viewMatrix, 0.1f, (frameNumber) % runCycle.frame_count);
     } // Render()
 
     // camera control events: WASD for motion
