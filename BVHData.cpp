@@ -227,7 +227,7 @@ void BVHData::ReadMotion(std::ifstream& inFile)
     // Cartesian3 jointPosition = parentMatrix * jointOffset;
     // Render bone as a cylinder
 
-
+    if (joint->id > 0) {
             Cartesian3 start = offsetFromRoot;
             Cartesian3 end = parentMatrix.column(3).Vector();
 
@@ -240,13 +240,12 @@ void BVHData::ReadMotion(std::ifstream& inFile)
             Matrix4 newView = viewMatrix;
 
             RenderCylinder(newView, start, end);
-
-            //parentMatrix = currRotation  *parentMatrix;
-            // Render children recursively
-            for (size_t i = 0; i < joint->Children.size(); i++) {
+    }
+    //parentMatrix = currRotation  *parentMatrix;
+    // Render children recursively
+    for (size_t i = 0; i < joint->Children.size(); i++) {
             RenderJoint(viewMatrix, parentMatrix, &(joint->Children[i]), scale, frame);
-            return;
-            }
+    }
 
     } // RenderJoint()
 
@@ -254,11 +253,12 @@ void BVHData::ReadMotion(std::ifstream& inFile)
     void BVHData::RenderCylinder(Matrix4 &viewMatrix, Cartesian3 start, Cartesian3 end)
     { // RenderCylinder()
 
-            // YOUR CODE GOES HERE
-            Cartesian3 up = Cartesian3(0, 1, 0);
-            Matrix4 rotation = Matrix4::GetRotation(end - start, up);
-            Matrix4 finalTransform = viewMatrix * Matrix4::Translate(start) * rotation;
-            this->Cylinder(finalTransform, 0.5f, (end - start).length(), 20);
+    // YOUR CODE GOES HERE
+    Cartesian3 up = Cartesian3(0, 0, 1);
+    Matrix4 rotation = Matrix4::GetRotation(up, end - start);
+    Matrix4 finalTransform = viewMatrix * Matrix4::RotateX(-90.0) * Matrix4::Translate(start)
+                             * rotation;
+    this->Cylinder(finalTransform, 0.05f, (end - start).length(), 10);
     } // RenderCylinder()
 
 // render a single cylinder given radius, length and vertical slices

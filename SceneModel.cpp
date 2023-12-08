@@ -136,7 +136,7 @@ SceneModel::SceneModel()
     //        Matrix4 newView = viewMatrix * Matrix4::Translate(end - start);
     //        restPose.RenderCylinder(newView, start, end);
     //    }
-    restPose.Render(viewMatrix, 0.3f, 0);
+    restPose.Render(viewMatrix, 0.1f, 0);
     } // Render()
 
     // camera control events: WASD for motion
