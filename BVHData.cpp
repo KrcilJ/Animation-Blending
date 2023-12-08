@@ -213,16 +213,16 @@ void BVHData::ReadMotion(std::ifstream& inFile)
     currRotation[0][3] = 0;
     currRotation[1][3] = 0;
     currRotation[2][3] = 0;
-    Cartesian3 parentRotation = boneRotations[frame][joint->id];
-    Matrix4 rotation = Matrix4::RotateZ(parentRotation.z) * Matrix4::RotateY(parentRotation.y)
-                       * Matrix4::RotateX(parentRotation.x);
+    Cartesian3 jointRotation = boneRotations[frame][joint->id];
+    Matrix4 rotation = Matrix4::RotateZ(jointRotation.x) * Matrix4::RotateY(jointRotation.y)
+                       * Matrix4::RotateX(jointRotation.z);
 
     // Transform joint offset based on frame and scale
 
     Cartesian3 offsetFromRoot = parentMatrix.column(3).Vector();
     Cartesian3 jointOffset = boneTranslations[joint->id] * scale;
 
-    parentMatrix = parentMatrix * Matrix4::Translate(jointOffset) * rotation;
+    parentMatrix = parentMatrix * Matrix4::Translate(jointOffset) ;
 
     //parentMatrix = parentMatrix * currRotation;
     // Transform joint position based on parentMatrix
@@ -230,16 +230,18 @@ void BVHData::ReadMotion(std::ifstream& inFile)
 
     if (joint->id > 0) {
             Cartesian3 start = offsetFromRoot;
-            Cartesian3 end = parentMatrix.column(3).Vector();
+            Cartesian3 end = offsetFromRoot + jointOffset;
 
             Cartesian3 z = Cartesian3(0, 0, 1);
             //find the rotation between the vector that describes the cylinder and the z axis vector
             //this will be the rotation to apply to the joint so the cylinder is rotated correctly
             Matrix4 rotation2 = Matrix4::GetRotation(z, end - start);
             //rotate the cylinder at the joint
-            Matrix4 cylinderTransform = Matrix4::Translate(start) * rotation2;
+            Matrix4 cylinderTransform = Matrix4::Translate(start) * rotation2 ;
             //multiply by the inverse of the world2OpenglMatrix to have the character correctly oriented
-            Matrix4 finalTransform = viewMatrix * Matrix4::RotateX(-90.0) * cylinderTransform;
+
+
+            Matrix4 finalTransform = viewMatrix * Matrix4::RotateX(-90.0)  * cylinderTransform;
             // Render bone as a cylinder
             RenderCylinder(finalTransform, start, end);
     }
