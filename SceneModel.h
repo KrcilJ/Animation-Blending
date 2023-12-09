@@ -40,8 +40,8 @@ class SceneModel
 	BVHData runCycle;
 	BVHData veerLeftCycle;
 	BVHData veerRightCycle;
-
-	// location & orientation of character
+    BVHData walking;
+    // location & orientation of character
 	Cartesian3 characterLocation;
 	Matrix4 characterRotation;
 

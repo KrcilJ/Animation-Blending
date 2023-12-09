@@ -22,6 +22,7 @@ const char* motionBvhStand		= "./models/stand.bvh";
 const char* motionBvhRun		= "./models/fast_run.bvh";
 const char* motionBvhveerLeft	= "./models/veer_left.bvh";
 const char* motionBvhveerRight	= "./models/veer_right.bvh";
+const char *motionBvhWalk = "./models/walking.bvh";
 const float cameraSpeed = 0.5;
 
 const Homogeneous4 sunDirection(0.5, -0.5, 0.3, 1.0);
@@ -42,7 +43,7 @@ SceneModel::SceneModel()
 	runCycle.ReadFileBVH(motionBvhRun);
 	veerLeftCycle.ReadFileBVH(motionBvhveerLeft);
 	veerRightCycle.ReadFileBVH(motionBvhveerRight);
-
+    walking.ReadFileBVH(motionBvhWalk);
     // set the world to opengl matrix
     world2OpenGLMatrix = Matrix4::RotateX(90.0);
     CameraTranslateMatrix = Matrix4::Translate(Cartesian3(-5, 15, -15.5));
@@ -111,8 +112,9 @@ SceneModel::SceneModel()
     // now set the colour to draw the bones
     glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, boneColour);
 
-    restPose.Render(viewMatrix, 0.1f, 0);
+    //    restPose.Render(viewMatrix, 0.1f, 0);
     //runCycle.Render(viewMatrix, 0.1f, (frameNumber) % runCycle.frame_count);
+    walking.Render(viewMatrix, 0.1f, (frameNumber) % walking.frame_count);
     } // Render()
 
     // camera control events: WASD for motion
