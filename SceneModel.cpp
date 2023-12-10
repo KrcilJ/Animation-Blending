@@ -64,6 +64,7 @@ SceneModel::SceneModel()
     frameNumber++;
 
     } // Update()
+
     // routine to tell the scene to render itself
     void SceneModel::Render()
     { // Render()
@@ -113,20 +114,22 @@ SceneModel::SceneModel()
 
     //    restPose.Render(viewMatrix, 0.1f, 0);
     //move the character forward
-    if (frameNumber % veerLeftCycle.frame_count == 19) {
-        characterRotation = Matrix4::RotateZ(-22.5) * characterRotation;
-    } else if (frameNumber % veerLeftCycle.frame_count == 20) {
-        characterRotation = Matrix4::RotateZ(-22.5) * characterRotation;
-    } else if (frameNumber % veerLeftCycle.frame_count == 21) {
-        characterRotation = Matrix4::RotateZ(-22.5) * characterRotation;
-    } else if (frameNumber % veerLeftCycle.frame_count == 22) {
-        characterRotation = Matrix4::RotateZ(-22.5) * characterRotation;
-    }
+    //    if (frameNumber % veerLeftCycle.frame_count == 26) {
+    //        characterRotation = Matrix4::RotateZ(-22.5) * characterRotation;
+    //    } else if (frameNumber % veerLeftCycle.frame_count == 27) {
+    //        characterRotation = Matrix4::RotateZ(-22.5) * characterRotation;
+    //    } else if (frameNumber % veerLeftCycle.frame_count == 28) {
+    //        characterRotation = Matrix4::RotateZ(-32.5) * characterRotation;
+    //    } else if (frameNumber % veerLeftCycle.frame_count == 29) {
+    //        characterRotation = Matrix4::RotateZ(-12.5) * characterRotation;
+    //    }
+    int animationFrame = frameNumber % veerLeftCycle.frame_count;
+    calcRotation(animationFrame);
     characterLocation = characterLocation + characterRotation * Cartesian3(0, -0.5f, 0);
     Matrix4 moveMat = viewMatrix * Matrix4::Translate(characterLocation) * characterRotation;
     //runCycle.Render(moveMat, 0.1f, (frameNumber) % runCycle.frame_count);
 
-    veerLeftCycle.Render(moveMat, 0.1f, (frameNumber) % veerLeftCycle.frame_count);
+    veerLeftCycle.Render(moveMat, 0.1f, animationFrame);
     //walking.Render(viewMatrix, 0.1f, (frameNumber) % walking.frame_count);
     } // Render()
 
@@ -195,12 +198,21 @@ void SceneModel::EventCharacterForward()
 	} // EventCharacterForward()
 	
 void SceneModel::EventCharacterBackward()
-	{ // EventCharacterBackward()
-	} // EventCharacterBackward()
+{ // EventCharacterBackward()
+} // EventCharacterBackward()
 
 // reset character to original position: p
 void SceneModel::EventCharacterReset()
-	{ // EventCharacterReset()
-	this->characterLocation = Cartesian3(0, 0, 0);
-	this->characterRotation = Matrix4::Identity();
-	} // EventCharacterReset()
+{ // EventCharacterReset()
+    this->characterLocation = Cartesian3(0, 0, 0);
+    this->characterRotation = Matrix4::Identity();
+} // EventCharacterReset()
+
+float SceneModel::calcRotation(int animationFrame)
+{
+    if (animationFrame >= startFrame && animationFrame < endFrame) {
+        float relativeRotation = totalRotation / (endFrame - startFrame);
+        characterRotation = Matrix4::RotateZ(relativeRotation) * characterRotation;
+        return relativeRotation;
+    }
+}

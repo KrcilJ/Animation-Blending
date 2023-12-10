@@ -49,15 +49,17 @@ class SceneModel
     // by OpenGL
     Matrix4 world2OpenGLMatrix;
 
-	// matrix for user camera
-	Matrix4 viewMatrix;
-	Matrix4 CameraTranslateMatrix;
-	Matrix4 CameraRotationMatrix;
-	
-	// the frame number for use in animating
-	unsigned long frameNumber;
-	
-	// constructor
+    // matrix for user camera
+    Matrix4 viewMatrix;
+    Matrix4 CameraTranslateMatrix;
+    Matrix4 CameraRotationMatrix;
+    int startFrame = 20;          // frame to start rotating
+    int endFrame = 33;            // frame to end rotation
+    float totalRotation = -90.0f; // Total rotation expected to be done by the character
+    // the frame number for use in animating
+    unsigned long frameNumber;
+
+    // constructor
 	SceneModel();
 
 	// routine that updates the scene for the next frame
@@ -86,11 +88,11 @@ class SceneModel
 
 	// reset character to original position: p
 	void EventCharacterReset();
+    float calcRotation(int animationFrame);
+    // needed for now for Xiaoyuan's code
+    void EventSwitchMode();
 
-	// needed for now for Xiaoyuan's code
-	void EventSwitchMode();
-
-	}; // class SceneModel
+    }; // class SceneModel
 
 #endif
 	
