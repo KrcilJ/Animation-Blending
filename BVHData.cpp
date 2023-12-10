@@ -204,15 +204,15 @@ void BVHData::RenderJoint(
     // get the rotation of the current joint
     Cartesian3 jointRotation = boneRotations[frame][joint->id];
     //create a rotation matrix
-    Matrix4 rotation = Matrix4::RotateZ(-jointRotation.z) * Matrix4::RotateY(-jointRotation.y)
-                       * Matrix4::RotateX(-jointRotation.x);
+    Matrix4 rotation = Matrix4::RotateZ(jointRotation.z) * Matrix4::RotateY(jointRotation.y)
+                       * Matrix4::RotateX(jointRotation.x);
     //currRotation = currRotation * rotation;
     Cartesian3 offsetFromRoot = parentMatrix.column(3).Vector();
     // Transform joint offset based on frame and scale
     Cartesian3 jointOffset = boneTranslations[joint->id] * scale;
     Matrix4 testMat = parentMatrix * Matrix4::Translate(jointOffset);
 
-    parentMatrix = parentMatrix * Matrix4::Translate(jointOffset) * rotation;
+    parentMatrix = parentMatrix * Matrix4::Translate(jointOffset) * rotation.transpose();
     //    parentMatrix = Matrix4::Translate(jointOffset) * Matrix4::Translate(offsetFromRoot)
     //                   * currRotation * rotation;
 

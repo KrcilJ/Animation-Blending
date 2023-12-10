@@ -41,6 +41,7 @@ class SceneModel
 	BVHData veerLeftCycle;
 	BVHData veerRightCycle;
     BVHData walking;
+    BVHData blendedAnimation;
     // location & orientation of character
     Cartesian3 characterLocation = Cartesian3(0, 0, 0);
     Matrix4 characterRotation = Matrix4::Identity();
@@ -50,17 +51,19 @@ class SceneModel
     // a matrix that specifies the mapping from world coordinates to those assumed
     // by OpenGL
     Matrix4 world2OpenGLMatrix;
-
+    std::vector<std::vector<Cartesian3>> blendedBoneRotations;
     // matrix for user camera
     Matrix4 viewMatrix;
     Matrix4 CameraTranslateMatrix;
     Matrix4 CameraRotationMatrix;
-    int startFrame = 20;          // frame to start rotating
+    int startFrame = 24;          // frame to start rotating
     int endFrame = 33;            // frame to end rotation
     float totalRotation = -90.0f; // Total rotation expected to be done by the character
     // the frame number for use in animating
     unsigned long frameNumber;
-
+    // the frame number for use in animating
+    unsigned long blendingStartFrame;
+    unsigned long blendingEndFrame;
     // constructor
     SceneModel();
 
@@ -93,7 +96,7 @@ class SceneModel
     float calcRotation(int animationFrame);
     // needed for now for Xiaoyuan's code
     void EventSwitchMode();
-
+    void blendBonerotations(std::vector<std::vector<Cartesian3>> &boneRotations, int animationFrame);
     }; // class SceneModel
 
 #endif

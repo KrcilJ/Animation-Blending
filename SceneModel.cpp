@@ -125,8 +125,12 @@ SceneModel::SceneModel()
     characterLocation = characterLocation + characterRotation * characterSpeed;
     Matrix4 moveMat = viewMatrix * Matrix4::Translate(characterLocation) * characterRotation;
     //runCycle.Render(moveMat, 0.1f, (frameNumber) % runCycle.frame_count);
+    if (frameNumber >= blendingStartFrame && frameNumber <= blendingEndFrame) {
+        blendedAnimation.Render(moveMat, 0.1f, frameNumber % 12);
+    } else {
+        currCycle.Render(moveMat, 0.1f, animationFrame);
+    }
 
-    currCycle.Render(moveMat, 0.1f, animationFrame);
     //walking.Render(viewMatrix, 0.1f, (frameNumber) % walking.frame_count);
     } // Render()
 
@@ -190,8 +194,16 @@ void SceneModel::EventCharacterTurnLeft()
 
     void SceneModel::EventCharacterTurnRight()
     { // EventCharacterTurnRight()
+    std::vector<std::vector<Cartesian3>> currRotations = currCycle.boneRotations;
+    int animationFrame = frameNumber % currCycle.frame_count;
+    blendedAnimation = currCycle;
     currCycle = veerRightCycle;
+    blendBonerotations(currRotations, animationFrame);
+
     runDir = "right";
+    blendingStartFrame = frameNumber;
+    blendingEndFrame = frameNumber + 12;
+
     } // EventCharacterTurnRight()
 
     void SceneModel::EventCharacterForward()
@@ -222,5 +234,19 @@ void SceneModel::EventCharacterTurnLeft()
         float relativeRotation = totalRotation / (endFrame - startFrame);
         characterRotation = Matrix4::RotateZ(relativeRotation) * characterRotation;
         return relativeRotation;
+    }
+    }
+    void SceneModel::blendBonerotations(std::vector<std::vector<Cartesian3>> &boneRotations,
+                                        int animationFrame)
+    {
+    float t = 1.0f;
+    float tStep = t / 12.0f;
+    for (int i = 0; i < 12; ++i) {
+        for (int joint = 0; joint < boneRotations[0].size(); ++joint) {
+            blendedAnimation.boneRotations[i][joint] = t * boneRotations[animationFrame][joint]
+                                                       + (1.0f - t)
+                                                             * currCycle.boneRotations[0][joint];
+        }
+        t -= tStep;
     }
     }

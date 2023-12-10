@@ -141,7 +141,14 @@ public:
 	void loadRotationData(std::vector<Cartesian3> &rotations, std::vector<float>& frames);
 
 	// check whether the given string is a number
-	bool isNumeric(const std::string&);
+    bool isNumeric(const std::string &);
+
+    void renderBlendedJoint(Matrix4 &viewMatrix,
+                            Matrix4 HierarchicalMatrix,
+                            Joint *joint,
+                            float scale,
+                            int frame,
+                            std::vector<std::vector<Cartesian3>> &rotations);
 };
 
 #endif
