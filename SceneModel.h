@@ -42,12 +42,12 @@ class SceneModel
 	BVHData veerRightCycle;
     BVHData walking;
     // location & orientation of character
-	Cartesian3 characterLocation;
-	Matrix4 characterRotation;
+    Cartesian3 characterLocation = Cartesian3(0, 0, 0);
+    Matrix4 characterRotation = Matrix4::Identity();
 
-	// a matrix that specifies the mapping from world coordinates to those assumed
-	// by OpenGL
-	Matrix4 world2OpenGLMatrix;
+    // a matrix that specifies the mapping from world coordinates to those assumed
+    // by OpenGL
+    Matrix4 world2OpenGLMatrix;
 
 	// matrix for user camera
 	Matrix4 viewMatrix;

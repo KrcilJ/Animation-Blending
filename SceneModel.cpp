@@ -64,7 +64,6 @@ SceneModel::SceneModel()
     frameNumber++;
 
     } // Update()
-
     // routine to tell the scene to render itself
     void SceneModel::Render()
     { // Render()
@@ -113,8 +112,22 @@ SceneModel::SceneModel()
     glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, boneColour);
 
     //    restPose.Render(viewMatrix, 0.1f, 0);
-    //runCycle.Render(viewMatrix, 0.1f, (frameNumber) % runCycle.frame_count);
-    walking.Render(viewMatrix, 0.1f, (frameNumber) % walking.frame_count);
+    //move the character forward
+    if (frameNumber % veerLeftCycle.frame_count == 19) {
+        characterRotation = Matrix4::RotateZ(-22.5) * characterRotation;
+    } else if (frameNumber % veerLeftCycle.frame_count == 20) {
+        characterRotation = Matrix4::RotateZ(-22.5) * characterRotation;
+    } else if (frameNumber % veerLeftCycle.frame_count == 21) {
+        characterRotation = Matrix4::RotateZ(-22.5) * characterRotation;
+    } else if (frameNumber % veerLeftCycle.frame_count == 22) {
+        characterRotation = Matrix4::RotateZ(-22.5) * characterRotation;
+    }
+    characterLocation = characterLocation + characterRotation * Cartesian3(0, -0.5f, 0);
+    Matrix4 moveMat = viewMatrix * Matrix4::Translate(characterLocation) * characterRotation;
+    //runCycle.Render(moveMat, 0.1f, (frameNumber) % runCycle.frame_count);
+
+    veerLeftCycle.Render(moveMat, 0.1f, (frameNumber) % veerLeftCycle.frame_count);
+    //walking.Render(viewMatrix, 0.1f, (frameNumber) % walking.frame_count);
     } // Render()
 
     // camera control events: WASD for motion
