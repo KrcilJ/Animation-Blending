@@ -44,6 +44,7 @@ SceneModel::SceneModel()
 	veerLeftCycle.ReadFileBVH(motionBvhveerLeft);
 	veerRightCycle.ReadFileBVH(motionBvhveerRight);
     walking.ReadFileBVH(motionBvhWalk);
+    currCycle = runCycle;
     // set the world to opengl matrix
     world2OpenGLMatrix = Matrix4::RotateX(90.0);
     CameraTranslateMatrix = Matrix4::Translate(Cartesian3(-5, 15, -15.5));
@@ -112,24 +113,20 @@ SceneModel::SceneModel()
     // now set the colour to draw the bones
     glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, boneColour);
 
-    //    restPose.Render(viewMatrix, 0.1f, 0);
-    //move the character forward
-    //    if (frameNumber % veerLeftCycle.frame_count == 26) {
-    //        characterRotation = Matrix4::RotateZ(-22.5) * characterRotation;
-    //    } else if (frameNumber % veerLeftCycle.frame_count == 27) {
-    //        characterRotation = Matrix4::RotateZ(-22.5) * characterRotation;
-    //    } else if (frameNumber % veerLeftCycle.frame_count == 28) {
-    //        characterRotation = Matrix4::RotateZ(-32.5) * characterRotation;
-    //    } else if (frameNumber % veerLeftCycle.frame_count == 29) {
-    //        characterRotation = Matrix4::RotateZ(-12.5) * characterRotation;
-    //    }
-    int animationFrame = frameNumber % veerLeftCycle.frame_count;
+    int animationFrame = frameNumber % currCycle.frame_count;
+    if (runDir == "right") {
+        totalRotation = 90.0f;
+    } else if (runDir == "left") {
+        totalRotation = -90.0f;
+    } else {
+        totalRotation = 0.0f;
+    }
     calcRotation(animationFrame);
     characterLocation = characterLocation + characterRotation * Cartesian3(0, -0.5f, 0);
     Matrix4 moveMat = viewMatrix * Matrix4::Translate(characterLocation) * characterRotation;
     //runCycle.Render(moveMat, 0.1f, (frameNumber) % runCycle.frame_count);
 
-    veerLeftCycle.Render(moveMat, 0.1f, animationFrame);
+    currCycle.Render(moveMat, 0.1f, animationFrame);
     //walking.Render(viewMatrix, 0.1f, (frameNumber) % walking.frame_count);
     } // Render()
 
@@ -187,32 +184,38 @@ void SceneModel::EventCameraTurnRight()
 // character motion events: arrow keys for forward, backward, veer left & right
 void SceneModel::EventCharacterTurnLeft()
 	{ // EventCharacterTurnLeft()
-	} // EventCharacterTurnLeft()
-	
-void SceneModel::EventCharacterTurnRight()
-	{ // EventCharacterTurnRight()
-	} // EventCharacterTurnRight()
-	
-void SceneModel::EventCharacterForward()
-	{ // EventCharacterForward()
-	} // EventCharacterForward()
-	
-void SceneModel::EventCharacterBackward()
-{ // EventCharacterBackward()
-} // EventCharacterBackward()
+    currCycle = veerLeftCycle;
+    runDir = "left";
+    } // EventCharacterTurnLeft()
 
-// reset character to original position: p
-void SceneModel::EventCharacterReset()
-{ // EventCharacterReset()
+    void SceneModel::EventCharacterTurnRight()
+    { // EventCharacterTurnRight()
+    currCycle = veerRightCycle;
+    runDir = "right";
+    } // EventCharacterTurnRight()
+
+    void SceneModel::EventCharacterForward()
+    { // EventCharacterForward()
+    currCycle = runCycle;
+    runDir = "forward";
+    } // EventCharacterForward()
+
+    void SceneModel::EventCharacterBackward()
+    { // EventCharacterBackward()
+    } // EventCharacterBackward()
+
+    // reset character to original position: p
+    void SceneModel::EventCharacterReset()
+    { // EventCharacterReset()
     this->characterLocation = Cartesian3(0, 0, 0);
     this->characterRotation = Matrix4::Identity();
-} // EventCharacterReset()
+    } // EventCharacterReset()
 
-float SceneModel::calcRotation(int animationFrame)
-{
+    float SceneModel::calcRotation(int animationFrame)
+    {
     if (animationFrame >= startFrame && animationFrame < endFrame) {
         float relativeRotation = totalRotation / (endFrame - startFrame);
         characterRotation = Matrix4::RotateZ(relativeRotation) * characterRotation;
         return relativeRotation;
     }
-}
+    }

@@ -44,7 +44,8 @@ class SceneModel
     // location & orientation of character
     Cartesian3 characterLocation = Cartesian3(0, 0, 0);
     Matrix4 characterRotation = Matrix4::Identity();
-
+    BVHData currCycle;
+    std::string runDir = "forward";
     // a matrix that specifies the mapping from world coordinates to those assumed
     // by OpenGL
     Matrix4 world2OpenGLMatrix;
@@ -60,15 +61,15 @@ class SceneModel
     unsigned long frameNumber;
 
     // constructor
-	SceneModel();
+    SceneModel();
 
-	// routine that updates the scene for the next frame
-	void Update();
+    // routine that updates the scene for the next frame
+    void Update();
 
-	// routine to tell the scene to render itself
-	void Render();
+    // routine to tell the scene to render itself
+    void Render();
 
-	// camera control events: WASD for motion
+    // camera control events: WASD for motion
 	void EventCameraForward();
 	void EventCameraLeft();
 	void EventCameraRight();
