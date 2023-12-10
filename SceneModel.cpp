@@ -122,7 +122,7 @@ SceneModel::SceneModel()
         totalRotation = 0.0f;
     }
     calcRotation(animationFrame);
-    characterLocation = characterLocation + characterRotation * Cartesian3(0, -0.5f, 0);
+    characterLocation = characterLocation + characterRotation * characterSpeed;
     Matrix4 moveMat = viewMatrix * Matrix4::Translate(characterLocation) * characterRotation;
     //runCycle.Render(moveMat, 0.1f, (frameNumber) % runCycle.frame_count);
 
@@ -198,10 +198,12 @@ void SceneModel::EventCharacterTurnLeft()
     { // EventCharacterForward()
     currCycle = runCycle;
     runDir = "forward";
+    this->characterSpeed = Cartesian3(0, -0.5f, 0);
     } // EventCharacterForward()
 
     void SceneModel::EventCharacterBackward()
     { // EventCharacterBackward()
+    this->characterSpeed = Cartesian3(0, 0.5f, 0);
     } // EventCharacterBackward()
 
     // reset character to original position: p
@@ -209,6 +211,9 @@ void SceneModel::EventCharacterTurnLeft()
     { // EventCharacterReset()
     this->characterLocation = Cartesian3(0, 0, 0);
     this->characterRotation = Matrix4::Identity();
+    currCycle = restPose;
+    runDir = "rest";
+    this->characterSpeed = Cartesian3(0, 0, 0);
     } // EventCharacterReset()
 
     float SceneModel::calcRotation(int animationFrame)

@@ -46,6 +46,7 @@ class SceneModel
     Matrix4 characterRotation = Matrix4::Identity();
     BVHData currCycle;
     std::string runDir = "forward";
+    Cartesian3 characterSpeed = Cartesian3(0, -0.5f, 0);
     // a matrix that specifies the mapping from world coordinates to those assumed
     // by OpenGL
     Matrix4 world2OpenGLMatrix;
@@ -70,7 +71,7 @@ class SceneModel
     void Render();
 
     // camera control events: WASD for motion
-	void EventCameraForward();
+    void EventCameraForward();
 	void EventCameraLeft();
 	void EventCameraRight();
 	void EventCameraBackward();
