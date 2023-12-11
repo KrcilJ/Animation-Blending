@@ -62,7 +62,7 @@ SceneModel::SceneModel()
     void SceneModel::Update()
     { // Update()
     // increment the frame counter
-    frameNumber++;
+    //frameNumber++;
 
     } // Update()
 
@@ -113,7 +113,6 @@ SceneModel::SceneModel()
     // now set the colour to draw the bones
     glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, boneColour);
 
-    int animationFrame = frameNumber % currCycle.frame_count;
     if (runDir == "right") {
         totalRotation = 90.0f;
     } else if (runDir == "left") {
@@ -121,14 +120,17 @@ SceneModel::SceneModel()
     } else {
         totalRotation = 0.0f;
     }
-    calcRotation(animationFrame);
+    //calcRotation(animationFrame);
     characterLocation = characterLocation + characterRotation * characterSpeed;
     Matrix4 moveMat = viewMatrix * Matrix4::Translate(characterLocation) * characterRotation;
     //runCycle.Render(moveMat, 0.1f, (frameNumber) % runCycle.frame_count);
-    if (frameNumber >= blendingStartFrame && frameNumber <= blendingEndFrame) {
-        blendedAnimation.Render(moveMat, 0.1f, frameNumber % 12);
+    if (frameNumber >= blendingStartFrame && frameNumber < blendingEndFrame) {
+        blendedAnimation.Render(moveMat, 0.1f, frameNumber - blendingStartFrame);
+        std::cout << "blended frame" << frameNumber - blendingStartFrame << std::endl;
     } else {
+        int animationFrame = (frameNumber - blendingEndFrame) % currCycle.frame_count;
         currCycle.Render(moveMat, 0.1f, animationFrame);
+        std::cout << "normal frame" << animationFrame << std::endl;
     }
 
     //walking.Render(viewMatrix, 0.1f, (frameNumber) % walking.frame_count);
@@ -210,12 +212,13 @@ void SceneModel::EventCharacterTurnLeft()
     { // EventCharacterForward()
     currCycle = runCycle;
     runDir = "forward";
-    this->characterSpeed = Cartesian3(0, -0.5f, 0);
+    //this->characterSpeed = Cartesian3(0, -0.1f, 0);
     } // EventCharacterForward()
 
     void SceneModel::EventCharacterBackward()
     { // EventCharacterBackward()
-    this->characterSpeed = Cartesian3(0, 0.5f, 0);
+    frameNumber++;
+    //this->characterSpeed = Cartesian3(0, 0.5f, 0);
     } // EventCharacterBackward()
 
     // reset character to original position: p
@@ -240,11 +243,13 @@ void SceneModel::EventCharacterTurnLeft()
                                         int animationFrame)
     {
     float t = 1.0f;
-    float tStep = t / 12.0f;
+    float tStep = t / 11.0f;
+    blendedAnimation.boneRotations.resize(12);
     for (int i = 0; i < 12; ++i) {
         for (int joint = 0; joint < boneRotations[0].size(); ++joint) {
-            blendedAnimation.boneRotations[i][joint] = t * boneRotations[animationFrame][joint]
-                                                       + (1.0f - t)
+            blendedAnimation.boneRotations[i][joint] = std::max(t, 0.0f)
+                                                           * boneRotations[animationFrame][joint]
+                                                       + ((1.0f - t) <= 1.0f ? (1.0f - t) : 1.0f)
                                                              * currCycle.boneRotations[0][joint];
         }
         t -= tStep;

@@ -62,8 +62,8 @@ class SceneModel
     // the frame number for use in animating
     unsigned long frameNumber;
     // the frame number for use in animating
-    unsigned long blendingStartFrame;
-    unsigned long blendingEndFrame;
+    unsigned long blendingStartFrame = -1;
+    unsigned long blendingEndFrame = 0;
     // constructor
     SceneModel();
 
