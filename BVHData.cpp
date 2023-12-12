@@ -196,42 +196,33 @@ void BVHData::Render(Matrix4 &viewMatrix, float scale, int frame)
 void BVHData::RenderJoint(
     Matrix4 &viewMatrix, Matrix4 parentMatrix, Joint *joint, float scale, int frame)
 { // RenderJoint()
-    Matrix4 currRotation = parentMatrix;
-    currRotation[0][3] = 0;
-    currRotation[1][3] = 0;
-    currRotation[2][3] = 0;
 
     // get the rotation of the current joint
     Cartesian3 jointRotation = boneRotations[frame][joint->id];
-    //create a rotation matrix
+    //create a rotation matrix from the euler angles
     Matrix4 rotation = Matrix4::RotateZ(jointRotation.z) * Matrix4::RotateY(jointRotation.y)
                        * Matrix4::RotateX(jointRotation.x);
-    //currRotation = currRotation * rotation;
+    //get the offset from the root bone
     Cartesian3 offsetFromRoot = parentMatrix.column(3).Vector();
-    // Transform joint offset based on frame and scale
+    // Transform the current joint offset based on frame and scale
     Cartesian3 jointOffset = boneTranslations[joint->id] * scale;
-    Matrix4 testMat = parentMatrix * Matrix4::Translate(jointOffset);
-
+    //update the parentMatrix for the next function call by the translate and the inverse of the rotation (as the matrix should be column major)
     parentMatrix = parentMatrix * Matrix4::Translate(jointOffset) * rotation.transpose();
-    //    parentMatrix = Matrix4::Translate(jointOffset) * Matrix4::Translate(offsetFromRoot)
-    //                   * currRotation * rotation;
 
-    //parentMatrix = parentMatrix * currRotation;
-    // Transform joint position based on parentMatrix
-    // Cartesian3 jointPosition = parentMatrix * jointOffset;
-
+    //dont render the root bone
     if (joint->id > 0) {
+        //set the start and end
         Cartesian3 start = offsetFromRoot;
         Cartesian3 end = parentMatrix.column(3).Vector();
 
         Cartesian3 z = Cartesian3(0, 0, 1);
-        //find the rotation between the vector that describes the cylinder and the z axis vector
+        //find the rotation between the vector that describes the bone and the z axis vector
         //this will be the rotation to apply to the joint so the cylinder is rotated correctly
         Matrix4 rotation2 = Matrix4::GetRotation(z, end - start);
         //rotate the cylinder at the joint
         Matrix4 cylinderTransform = Matrix4::Translate(start) * rotation2;
-        //multiply by the inverse of the world2OpenglMatrix to have the character correctly oriented
 
+        //multiply by the inverse of the world2OpenglMatrix to have the character correctly oriented
         Matrix4 finalTransform = viewMatrix * Matrix4::RotateX(-90.0) * cylinderTransform;
         // Render bone as a cylinder
         RenderCylinder(finalTransform, start, end);
@@ -248,7 +239,6 @@ void BVHData::RenderJoint(
 // render cylinder given the start position and the end position
 void BVHData::RenderCylinder(Matrix4 &viewMatrix, Cartesian3 start, Cartesian3 end)
 { // RenderCylinder()
-
     this->Cylinder(viewMatrix, 0.05f, (end - start).length(), 10);
 } // RenderCylinder()
 
