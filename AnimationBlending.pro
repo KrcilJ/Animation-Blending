@@ -4,16 +4,10 @@
 #TARGET = AnimationBlending
 
 QT = core gui widgets
-win32{
-
-    QT+=opengl
-    LIBS +=-lglu32 -lopengl32
-}
-unix{
 
 QT+=opengl
 LIBS += -lGLU
-}
+
 
 HEADERS = \
    $$PWD/AnimationCycleWidget.h \

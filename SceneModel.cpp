@@ -44,7 +44,7 @@ SceneModel::SceneModel()
 	veerLeftCycle.ReadFileBVH(motionBvhveerLeft);
 	veerRightCycle.ReadFileBVH(motionBvhveerRight);
     walking.ReadFileBVH(motionBvhWalk);
-    currCycle = runCycle;
+    currCycle = restPose;
     // set the world to opengl matrix
     world2OpenGLMatrix = Matrix4::RotateX(90.0);
     CameraTranslateMatrix = Matrix4::Translate(Cartesian3(-5, 15, -15.5));
@@ -125,15 +125,22 @@ SceneModel::SceneModel()
     if (frameNumber >= blendingStartFrame && frameNumber < blendingEndFrame) {
         Matrix4 blendedMoveMat = viewMatrix * Matrix4::Translate(characterLocation)
                                  * characterRotation;
+        //move the character according to the ground height
+        Cartesian3 pos = (Matrix4::Translate(characterLocation) * characterRotation).column(3).Vector();
+        blendedMoveMat = blendedMoveMat * Matrix4::Translate(Cartesian3(0,0,groundModel.getHeight(pos.x, pos.y)));
         blendedAnimation.Render(blendedMoveMat, 0.1f, frameNumber - blendingStartFrame - 1);
-        std::cout << "blended frame" << frameNumber - blendingStartFrame - 1 << std::endl;
+
     } else {
         int animationFrame = (frameNumber - blendingEndFrame) % currCycle.frame_count;
         calcRotation(animationFrame);
         characterLocation = characterLocation + characterRotation * characterSpeed;
         Matrix4 moveMat = viewMatrix * Matrix4::Translate(characterLocation) * characterRotation;
+
+        //std::cout << "normal frame" << animationFrame << std::endl;
+        Cartesian3 pos = (Matrix4::Translate(characterLocation) * characterRotation).column(3).Vector();
+        //move the character according to the ground height
+        moveMat = moveMat * Matrix4::Translate(Cartesian3(0,0,groundModel.getHeight(pos.x, pos.y)));
         currCycle.Render(moveMat, 0.1f, animationFrame);
-        std::cout << "normal frame" << animationFrame << std::endl;
     }
 
     //walking.Render(viewMatrix, 0.1f, (frameNumber) % walking.frame_count);
@@ -193,35 +200,66 @@ void SceneModel::EventCameraTurnRight()
 // character motion events: arrow keys for forward, backward, veer left & right
 void SceneModel::EventCharacterTurnLeft()
 	{ // EventCharacterTurnLeft()
-    currCycle = veerLeftCycle;
-    runDir = "left";
+    if(runDir != "left"){
+        std::vector<std::vector<Cartesian3>> currRotations = currCycle.boneRotations;
+        int animationFrame = frameNumber % currCycle.frame_count;
+        blendedAnimation = currCycle;
+        currCycle = veerLeftCycle;
+        blendBonerotations(currRotations, animationFrame);
+
+        runDir = "left";
+        blendingStartFrame = frameNumber;
+        blendingEndFrame = frameNumber + 13;
+    }
     } // EventCharacterTurnLeft()
 
     void SceneModel::EventCharacterTurnRight()
     { // EventCharacterTurnRight()
-    std::vector<std::vector<Cartesian3>> currRotations = currCycle.boneRotations;
-    int animationFrame = frameNumber % currCycle.frame_count;
-    blendedAnimation = currCycle;
-    currCycle = veerRightCycle;
-    blendBonerotations(currRotations, animationFrame);
+    if(runDir != "right"){
+        std::vector<std::vector<Cartesian3>> currRotations = currCycle.boneRotations;
+        int animationFrame = frameNumber % currCycle.frame_count;
+        blendedAnimation = currCycle;
+        currCycle = veerRightCycle;
+        blendBonerotations(currRotations, animationFrame);
 
-    runDir = "right";
-    blendingStartFrame = frameNumber;
-    blendingEndFrame = frameNumber + 7;
+        runDir = "right";
+        blendingStartFrame = frameNumber;
+        blendingEndFrame = frameNumber + 13;
+    }
+
 
     } // EventCharacterTurnRight()
 
     void SceneModel::EventCharacterForward()
     { // EventCharacterForward()
-    currCycle = runCycle;
-    runDir = "forward";
-    this->characterSpeed = Cartesian3(0, -0.2f, 0);
+        if(runDir != "forward"){
+            std::vector<std::vector<Cartesian3>> currRotations = currCycle.boneRotations;
+            int animationFrame = frameNumber % currCycle.frame_count;
+            blendedAnimation = currCycle;
+             currCycle = runCycle;
+            blendBonerotations(currRotations, animationFrame);
+            this->characterSpeed = Cartesian3(0, -0.2f, 0);
+            runDir = "forward";
+            blendingStartFrame = frameNumber;
+            blendingEndFrame = frameNumber + 13;
+        }
+
     } // EventCharacterForward()
 
     void SceneModel::EventCharacterBackward()
     { // EventCharacterBackward()
-    frameNumber++;
-    //this->characterSpeed = Cartesian3(0, 0.5f, 0);
+        if(runDir != "rest"){
+            std::vector<std::vector<Cartesian3>> currRotations = currCycle.boneRotations;
+            int animationFrame = frameNumber % currCycle.frame_count;
+            blendedAnimation = currCycle;
+             currCycle = restPose;
+            blendBonerotations(currRotations, animationFrame);
+            this->characterSpeed = Cartesian3(0, 0, 0);
+            runDir = "rest";
+            blendingStartFrame = frameNumber;
+            blendingEndFrame = frameNumber + 13;
+        }
+
     } // EventCharacterBackward()
 
     // reset character to original position: p
@@ -245,16 +283,21 @@ void SceneModel::EventCharacterTurnLeft()
     void SceneModel::blendBonerotations(std::vector<std::vector<Cartesian3>> &boneRotations,
                                         int animationFrame)
     {
-    int blendSteps = 6;
+    int blendSteps = 12;
     float t = 1.0f;
     float tStep = t / (blendSteps - 1.0f);
     blendedAnimation.boneRotations.resize(blendSteps);
+    for(int i =0; i < blendSteps; ++i){
+        blendedAnimation.boneRotations[i].resize(65);
+    }
     for (int i = 0; i < blendSteps; ++i) {
         for (int joint = 0; joint < boneRotations[0].size(); ++joint) {
+             // std::cout << boneRotations[animationFrame][joint] << " " << joint<< std::endl;
             blendedAnimation.boneRotations[i][joint] = std::max(t, 0.0f)
                                                            * boneRotations[animationFrame][joint]
                                                        + ((1.0f - t) <= 1.0f ? (1.0f - t) : 1.0f)
                                                              * currCycle.boneRotations[0][joint];
+
         }
         t -= tStep;
     }
