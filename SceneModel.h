@@ -97,6 +97,7 @@ class SceneModel
     // needed for now for Xiaoyuan's code
     void EventSwitchMode();
     void blendBonerotations(std::vector<std::vector<Cartesian3>> &boneRotations, int animationFrame);
+    void blendAnimation(std::string newPose, BVHData &newBVH);
     }; // class SceneModel
 
 #endif

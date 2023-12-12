@@ -201,30 +201,16 @@ void SceneModel::EventCameraTurnRight()
 void SceneModel::EventCharacterTurnLeft()
 	{ // EventCharacterTurnLeft()
     if(runDir != "left"){
-        std::vector<std::vector<Cartesian3>> currRotations = currCycle.boneRotations;
-        int animationFrame = frameNumber % currCycle.frame_count;
-        blendedAnimation = currCycle;
-        currCycle = veerLeftCycle;
-        blendBonerotations(currRotations, animationFrame);
-
-        runDir = "left";
-        blendingStartFrame = frameNumber;
-        blendingEndFrame = frameNumber + 13;
+         blendAnimation("left", veerLeftCycle);
+         this->characterSpeed = Cartesian3(0, -0.5f, 0);
     }
     } // EventCharacterTurnLeft()
 
     void SceneModel::EventCharacterTurnRight()
     { // EventCharacterTurnRight()
     if(runDir != "right"){
-        std::vector<std::vector<Cartesian3>> currRotations = currCycle.boneRotations;
-        int animationFrame = frameNumber % currCycle.frame_count;
-        blendedAnimation = currCycle;
-        currCycle = veerRightCycle;
-        blendBonerotations(currRotations, animationFrame);
-
-        runDir = "right";
-        blendingStartFrame = frameNumber;
-        blendingEndFrame = frameNumber + 13;
+       blendAnimation("right", veerRightCycle);
+       this->characterSpeed = Cartesian3(0, -0.5f, 0);
     }
 
 
@@ -233,15 +219,8 @@ void SceneModel::EventCharacterTurnLeft()
     void SceneModel::EventCharacterForward()
     { // EventCharacterForward()
         if(runDir != "forward"){
-            std::vector<std::vector<Cartesian3>> currRotations = currCycle.boneRotations;
-            int animationFrame = frameNumber % currCycle.frame_count;
-            blendedAnimation = currCycle;
-             currCycle = runCycle;
-            blendBonerotations(currRotations, animationFrame);
-            this->characterSpeed = Cartesian3(0, -0.2f, 0);
-            runDir = "forward";
-            blendingStartFrame = frameNumber;
-            blendingEndFrame = frameNumber + 13;
+           blendAnimation("forward", runCycle);
+           this->characterSpeed = Cartesian3(0, -0.5f, 0);
         }
 
     } // EventCharacterForward()
@@ -249,15 +228,7 @@ void SceneModel::EventCharacterTurnLeft()
     void SceneModel::EventCharacterBackward()
     { // EventCharacterBackward()
         if(runDir != "rest"){
-            std::vector<std::vector<Cartesian3>> currRotations = currCycle.boneRotations;
-            int animationFrame = frameNumber % currCycle.frame_count;
-            blendedAnimation = currCycle;
-             currCycle = restPose;
-            blendBonerotations(currRotations, animationFrame);
-            this->characterSpeed = Cartesian3(0, 0, 0);
-            runDir = "rest";
-            blendingStartFrame = frameNumber;
-            blendingEndFrame = frameNumber + 13;
+         blendAnimation("rest", restPose);
         }
 
     } // EventCharacterBackward()
@@ -301,4 +272,15 @@ void SceneModel::EventCharacterTurnLeft()
         }
         t -= tStep;
     }
+    }
+    void SceneModel::blendAnimation(std::string newPose, BVHData &nextBVH){
+        std::vector<std::vector<Cartesian3>> currRotations = currCycle.boneRotations;
+        int animationFrame = frameNumber % currCycle.frame_count;
+        blendedAnimation = currCycle;
+        currCycle = nextBVH;
+        blendBonerotations(currRotations, animationFrame);
+        this->characterSpeed = Cartesian3(0, 0, 0);
+        runDir = newPose;
+        blendingStartFrame = frameNumber;
+        blendingEndFrame = frameNumber + 13;
     }
